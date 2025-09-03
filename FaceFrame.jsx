@@ -32,10 +32,10 @@ const FaceFrameGuide = ({
 
   const baselineEyePxRef = useRef(null);
   const calibratingStreakRef = useRef(0);
-  const CALIBRATE_MIN_STREAK = 8; // кадров для фиксации базиса
-  const FAR_FACTOR = 0.85; // < 85% от базиса = слишком далеко
-  const CLOSE_FACTOR = 1.2; // > 120% от базиса = слишком близко
-  const LOST_RESET_STREAK = 12; // если потеряли лицо/не ок столько кадров — сброс базиса
+  const CALIBRATE_MIN_STREAK = 8;
+  const FAR_FACTOR = 0.85;
+  const CLOSE_FACTOR = 1.2;
+  const LOST_RESET_STREAK = 12;
   const lostStreakRef = useRef(0);
 
   useEffect(() => {
@@ -167,7 +167,6 @@ const FaceFrameGuide = ({
         const denom = 2 * Math.min(radiusX, radiusY);
         const relativeEyeDistance = eyeDistance / Math.max(denom, 1);
 
-        // --- Геометрические проверки для допуска в "калибровочную" зону ---
         const boxOk = !boxInsideRequired
           ? true
           : isBoundingBoxInsideEllipse(
@@ -190,7 +189,6 @@ const FaceFrameGuide = ({
             ? true
             : face.faceInViewConfidence > 0.95;
 
-        // --- Самокалибровка базового eyeDistance в пикселях ---
         if (boxOk && fracOk && confidenceOk) {
           calibratingStreakRef.current += 1;
           lostStreakRef.current = 0;
@@ -204,7 +202,6 @@ const FaceFrameGuide = ({
           calibratingStreakRef.current = 0;
         }
 
-        // --- Определение статуса дистанции ---
         let distanceStatus = "ok";
         const baseline = baselineEyePxRef.current;
         if (baseline != null) {
@@ -212,7 +209,6 @@ const FaceFrameGuide = ({
           else if (eyeDistance > baseline * CLOSE_FACTOR)
             distanceStatus = "tooClose";
         } else {
-          // пока базиса нет — мягкий fallback на относительную метрику
           if (relativeEyeDistance < minEyeRatio) distanceStatus = "tooFar";
           else if (relativeEyeDistance > maxEyeRatio)
             distanceStatus = "tooClose";
@@ -316,7 +312,7 @@ const FaceFrameGuide = ({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        transform: "scaleX(-1)", // ← флип превью, чтобы НЕ было зеркала
+        transform: "scaleX(-1)",
         transformOrigin: "center",
       }}
     />
